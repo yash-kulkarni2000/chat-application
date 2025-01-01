@@ -36,43 +36,47 @@ print("Class Weights:", train_class_weights)
 
 # Tokenize the data
 
+# Tokenizing the data is a critical step in natural language processing (NLP) tasks 
+# when using transformer-based models like DistilBERT. 
 
+# Transformers like DistilBERT cannot process raw text directly. 
+# They require numerical input, such as integers or tensors. 
+# Tokenization converts text into numerical representations that the model can process.
 
-# # print(data.head())
+# Example:
+# For the text: "I love NLP", tokenization might produce:
 
-# from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-# from transformers import Trainer, TrainingArguments
-# from sklearn.model_selection import train_test_split
-# import torch
+# Tokens: ["I", "love", "NLP"]
+# Token IDs: [100, 2028, 2562]
 
-# # Loading the tokenizer and the model
-# tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-# model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
+from transformers import DistilBertTokenizer
 
-# # tokenize text data for DistilBERT
-# def tokenize_data(texts, labels, tokenizer, max_length=128):
-#     tokens = tokenizer(
-#         texts.tolist(),
-#         max_length = max_length,
-#         padding = 'max_length',
-#         truncation = True,
-#         return_tensors = "pt"
-#     )
-#     return tokens, torch.tensor(labels.tolist())
+tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
-# # splitting the data
-# X_train, X_test, y_train, y_test = train_test_split(
-#     data['text'], data['label'], test_size=0.2, random_state=42
-# )
+def tokenize_data(texts, labels, tokenizer, max_length=128):
+    tokens = tokenizer(
+        texts.tolist(),
+        max_length = max_length,
+        padding = 'max_length',
+        truncation = True,
+        return_tensors = "pt"
+    )
+    return tokens, torch.tensor(labels.tolist())
 
-# train_tokens, train_labels = tokenize_data(X_train, y_train, tokenizer)
-# test_tokens, test_labels = tokenize_data(X_test, y_test, tokenizer)
+train_tokens, train_labels = tokenize_data(X_train, y_train, tokenizer)
+test_tokens, test_labels = tokenize_data(X_test, y_test, tokenizer)
 
-# # print(train_tokens)
-# # print(train_labels)
-# # print(test_labels)
-# # print(test_tokens)
+print(train_tokens)
+print(train_labels)
+print(test_labels)
+print(test_tokens)
 
+# saving these tokens for further use
+
+torch.save(train_tokens, "tokenization/train_tokens.pt")
+torch.save(train_labels, "tokenization/train_labels.pt")
+torch.save(test_tokens, "tokenization/test_tokens.pt")
+torch.save(test_labels, "tokenization/test_labels.pt")
  
 # # Using Hugging Face's Trainer for easy training
 # from torch.utils.data import Dataset
