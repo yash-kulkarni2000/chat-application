@@ -53,7 +53,7 @@ from transformers import DistilBertTokenizer
 
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
-def tokenize_data(texts, labels, tokenizer, max_length=128):
+def tokenize_data(texts, labels, tokenizer, max_length=256):
     tokens = tokenizer(
         texts.tolist(),
         max_length = max_length,
@@ -77,67 +77,89 @@ torch.save(train_tokens, "tokenization/train_tokens.pt")
 torch.save(train_labels, "tokenization/train_labels.pt")
 torch.save(test_tokens, "tokenization/test_tokens.pt")
 torch.save(test_labels, "tokenization/test_labels.pt")
- 
-# # Using Hugging Face's Trainer for easy training
-# from torch.utils.data import Dataset
 
-# class HateSpeechDataset(Dataset):
-#     def __init__(self, tokens, labels):
-#         self.tokens = tokens
-#         self.labels = labels
+# Training the model
 
-#     def __len__(self):
-#         return len(self.labels)
+from transformers import DistilBertForSequenceClassification, TrainingArguments
+from torch.utils.data import Dataset
+
+class HateSpeechDataset(Dataset):
+    def __init__(self, tokens, labels):
+        self.tokens = tokens
+        self.labels = labels
+
+    def __len__(self):
+        return len(self.labels)
     
-#     def __getitem__(self, index):
-#         return {
-#             "input_ids": self.tokens['input_ids'][index],
-#             "attention_mask": self.tokens['attention_mask'][index],
-#             "labels": self.labels[index]
-#         }
+    def __getitem__(self, index):
+        return {
+            "input_ids": self.tokens['input_ids'][index],
+            "attention_mask": self.tokens['attention_mask'][index],
+            "labels": self.labels[index]
+        }
+
+train_dataset = HateSpeechDataset(train_tokens, train_labels)
+test_dataset = HateSpeechDataset(test_tokens, test_labels)
+
+model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
+
+training_args = TrainingArguments(
+    output_dir='./results',
+    num_train_epochs=5,
+    per_device_train_batch_size=16,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    logging_dir='./logs',
+    logging_steps=10,
+    learning_rate=2e-5
+)
+
+from transformers import Trainer
+
+def custom_loss_fn(outputs, labels):
+    loss_fn = torch.nn.CrossEntropyLoss(weight=train_class_weights)
+    return loss_fn(outputs.logits, labels)
+
+class CustomTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop("labels")
+        outputs = model(**inputs)
+        loss = custom_loss_fn(outputs, labels)
+        return (loss, outputs) if return_outputs else loss
     
+trainer = CustomTrainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=test_dataset,
+)
 
-# train_dataset = HateSpeechDataset(train_tokens, train_labels)
-# test_dataset = HateSpeechDataset(test_tokens, test_labels)
+trainer.train()
 
-# training_args = TrainingArguments(
-#     output_dir='./results',
-#     num_train_epochs=3,
-#     per_device_train_batch_size=16,
-#     evaluation_strategy="epoch",
-#     save_strategy="epoch",
-#     logging_dir='./logs',
-#     logging_steps=10,
-# )
+# Evaluate the model
 
-# trainer = Trainer(
-#     model=model,
-#     args=training_args,
-#     train_dataset=train_dataset,
-#     eval_dataset=test_dataset
-# )
+eval_results = trainer.evaluate()
+print(eval_results)
 
-# # model training, no need to run everytime, run when you download the code for the first time.
-# # trainer.train()
+predictions = trainer.predict(test_dataset)
 
-# eval_results = trainer.evaluate()
-# print(eval_results)
-            
-# tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
-# model = DistilBertForSequenceClassification.from_pretrained("./results/checkpoint-6096")
+true_labels = predictions.label_ids
+predicted_labels = predictions.predictions.argmax(-1)
 
-# text = ["you are an asshole", "This is a neutral comment", "dalits are lowlife scum"]
-# tokens = tokenizer(
-#     text, 
-#     max_length=128, 
-#     padding='max_length', 
-#     truncation=True, 
-#     return_tensors="pt"
-# )
+precision, recall, f1, _ = precision_recall_fscore_support(true_labels, predicted_labels, average='binary')
+accuracy = accuracy_score(true_labels, predicted_labels)
 
-# outputs = model(**tokens)
-# predictions = torch.argmax(outputs.logits, dim=1)
-# print(predictions)
+metrics = {
+    "accuracy": accuracy,
+    "f1": f1,
+    "precision": precision,
+    "recall": recall
+}
+
+print(metrics)
+
+
 
 
