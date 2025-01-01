@@ -136,6 +136,9 @@ trainer = CustomTrainer(
 
 trainer.train()
 
+model.save_pretrained("./saved_model")
+tokenizer.save_pretrained("./saved_model")
+
 # Evaluate the model
 
 eval_results = trainer.evaluate()
