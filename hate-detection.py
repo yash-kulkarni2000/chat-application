@@ -121,7 +121,7 @@ def custom_loss_fn(outputs, labels):
     return loss_fn(outputs.logits, labels)
 
 class CustomTrainer(Trainer):
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         labels = inputs.pop("labels")
         outputs = model(**inputs)
         loss = custom_loss_fn(outputs, labels)
