@@ -33,6 +33,14 @@
   word-wrap: break-word;
 }
 
+.hate-speech {
+  background-color: red !important;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
 .chat-message.user {
   background-color: #e1ffc7;
   align-self: flex-end;
@@ -78,4 +86,6 @@ button:disabled {
 button:hover:not(:disabled) {
   background-color: #45a049;
 }
+
+
 

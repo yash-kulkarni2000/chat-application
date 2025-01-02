@@ -26,7 +26,9 @@ function App () {
 
       const data = await response.json();
 
-      if (data.classification === 'Hate Speech') {
+      const isHateSpeech = data.classification === 'Hate Speech';
+
+      if (isHateSpeech) {
         const confirmSend = window.confirm(
           'Your message contains potentially harmful content. Are you sure you want to send it?'
         );
@@ -39,7 +41,7 @@ function App () {
 
       setChatHistory((prev) => [
         ...prev,
-        {sender: 'Bot', text: `Classification: ${data.classification}`},
+        {sender: 'Bot', text: `Classification: ${data.classification}`, isHateSpeech},
         {sender: 'Bot', text: data.reply},
       ]);
     } catch (error){
@@ -60,7 +62,8 @@ function App () {
         <h1>No Hate Mate!</h1>
         <div className='chat-window'>
           {chatHistory.map((entry, index) => (
-            <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'}`}>
+            <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'} 
+            ${entry.isHateSpeech ? 'hate-speech': ''}`}>
             <strong>{entry.sender}:</strong>{entry.text}
             </div>
           ))}
