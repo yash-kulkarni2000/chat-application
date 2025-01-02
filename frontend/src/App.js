@@ -26,6 +26,17 @@ function App () {
 
       const data = await response.json();
 
+      if (data.classification === 'Hate Speech') {
+        const confirmSend = window.confirm(
+          'Your message contains potentially harmful content. Are you sure you want to send it?'
+        );
+        if (!confirmSend) {
+          setChatHistory((prev) => prev.slice(0, -1));
+          setIsLoading(false);
+          return;
+        }
+      }
+
       setChatHistory((prev) => [
         ...prev,
         {sender: 'Bot', text: `Classification: ${data.classification}`},
