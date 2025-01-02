@@ -3,14 +3,16 @@ import './App.css';
 
 function App () {
   const [message, setMessage] = useState('');
-  const [classification, setClassification] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
 
-  const classifyMessage = async () => {
+  const sendMessage = async () => {
     if (!message) {
       alert('Please enter a message');
       return;
     }
+
+    setChatHistory((prev) => [...prev, {sender: 'User', text: message}]);
 
     setIsLoading(true);
     try {
@@ -23,27 +25,44 @@ function App () {
       });
 
       const data = await response.json();
-      setClassification(`Classification: ${data.classification}`);
-    } catch (error) {
+
+      setChatHistory((prev) => [
+        ...prev,
+        {sender: 'Bot', text: `Classification: ${data.classification}`},
+        {sender: 'Bot', text: data.reply},
+      ]);
+    } catch (error){
       console.error('Error:', error);
-      setClassification('Error classifying the message. Please try again.');
+      setChatHistory((prev) => [
+        ...prev,
+        {sender: 'Bot', text: 'Error communicating with the server'},
+      ]);
     } finally {
       setIsLoading(false);
-    } 
-  };
+      setMessage('');
+    }
+  }; 
 
   return (
     <div className='App'>
       <header className='App-header'>
-        <h1>Hate Speech Classification</h1>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder='Type your message here...'/>
-        <button onClick={classifyMessage} disabled={isLoading}>
-          {isLoading ? 'Classifying...': 'Classify'}
-        </button>
-        {classification && <p>{classification}</p>}
+        <h1>No Hate Mate!</h1>
+        <div className='chat-window'>
+          {chatHistory.map((entry, index) => (
+            <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'}`}>
+            <strong>{entry.sender}:</strong>{entry.text}
+            </div>
+          ))}
+        </div>
+        <div className='input-area'>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your message here..."/>
+          <button onClick={sendMessage} disabled={isLoading}>
+            {isLoading ? 'Sending...' : 'Send'}
+          </button>
+        </div>
       </header>
     </div>
-  )
+  );
 }
 
 export default App;
