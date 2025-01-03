@@ -38,7 +38,7 @@ function App () {
           return;
         }
       }
-
+ 
       setChatHistory((prev) => [
         ...prev,
         {sender: 'Bot', text: `Classification: ${data.classification}`, isHateSpeech},
@@ -54,12 +54,14 @@ function App () {
       setIsLoading(false);
       setMessage('');
     }
-  }; 
+
+  };
+
 
   return (
     <div className='App'>
       <header className='App-header'>
-        <h1>No Hate Mate!</h1>
+        <h1>No Hate Mate</h1>
         <div className='chat-window'>
           {chatHistory.map((entry, index) => (
             <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'} 
