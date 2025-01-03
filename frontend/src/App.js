@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import './App.css';
 
 function App () {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  const chatWindowRef = useRef(null);
 
   const sendMessage = async () => {
     if (!message) {
@@ -57,12 +58,18 @@ function App () {
 
   };
 
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
 
   return (
     <div className='App'>
       <header className='App-header'>
         <h1>No Hate Mate</h1>
-        <div className='chat-window'>
+        <div className='chat-window' ref={chatWindowRef}>
           {chatHistory.map((entry, index) => (
             <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'} 
             ${entry.isHateSpeech ? 'hate-speech': ''}`}>
