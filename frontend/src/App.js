@@ -64,6 +64,13 @@ function App () {
     }
   }, [chatHistory]);
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
 
   return (
     <div className='App'>
@@ -78,7 +85,7 @@ function App () {
           ))}
         </div>
         <div className='input-area'>
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your message here..."/>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your message here..."/>
           <button onClick={sendMessage} disabled={isLoading}>
             {isLoading ? 'Sending...' : 'Send'}
           </button>
