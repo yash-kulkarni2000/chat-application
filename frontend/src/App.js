@@ -80,7 +80,7 @@ function App () {
           {chatHistory.map((entry, index) => (
             <div key={index} className={`chat-message ${entry.sender === 'User' ? 'user' : 'bot'} 
             ${entry.isHateSpeech ? 'hate-speech': ''}`}>
-            <strong>{entry.sender}:</strong>{entry.text}
+            {entry.text}
             </div>
           ))}
         </div>

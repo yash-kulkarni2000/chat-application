@@ -36,7 +36,7 @@ def classify_message():
         bot_reply = gpt_response.choices[0].message['content']
 
         if "Hate Speech" in classification:
-            bot_reply = "Hate speech detected, " + gpt_response.choices[0].message['content']
+            bot_reply = gpt_response.choices[0].message['content']
 
         return jsonify({"classification": classification, "reply": bot_reply})
     
