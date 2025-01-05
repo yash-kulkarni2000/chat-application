@@ -9,6 +9,8 @@ No Hate Mate is a chat application designed to identify and manage hateful or ha
 ### Home Page
 ![Home Page](screenshots/home-page.png)
 
+![Warning](screenshots/warning.png)
+
 
 ## Features
 
